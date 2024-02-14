@@ -1,0 +1,48 @@
+bits = [1 0 1 1 1 0 0 1]; 
+bitrate = 1;
+n = 1000;
+T = length(bits) / bitrate;
+N = n * length(bits);
+dt = T / N;
+t = 0:dt:T;
+x = zeros(1, length(t));
+
+lastbit = 1; 
+
+for i = 1:length(bits)
+    if bits(i) == 1
+        x((i - 1) * n + 1:(i - 1) * n + n/2) = -lastbit;
+        x((i - 1) * n + n/2:i * n) = lastbit; % Invert the last bit
+        lastbit = -lastbit; % Invert lastbit for the next bit
+    else
+        x((i - 1) * n + 1:(i - 1) * n + n/2) = lastbit;
+        x((i - 1) * n + n/2:i * n) = -lastbit;
+    end
+end
+
+
+
+disp('Differential Manchester Encoding :');
+
+plot(t, x, 'LineWidth', 3);
+decoded_bits = zeros(1, length(bits)); % Initialize decoded bits
+
+lastlevel = 1; % Initialize the last level
+
+for i = 1:length(bits)
+    mid_idx = round((i - 0.5) * n + 0.5 * n); % Middle index of each bit period
+    
+    % Differential Manchester decoding logic
+    if x(mid_idx) == lastlevel % No transition detected
+        decoded_bits(i) = 1; % Assign the bit as '1'
+        lastlevel = -lastlevel; % Invert the level for the next bit
+    else % Transition detected
+        decoded_bits(i) = 0; % Assign the bit as '0'
+    end
+end
+disp('Differential Manchester Dncoding :');
+% Display original and decoded bits
+disp('Original bits:');
+disp(bits);
+disp('Decoded bits:');
+disp(decoded_bits);
